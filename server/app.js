@@ -44,7 +44,7 @@ server.use(cors({
 }));
 
 
-// 请求顶部分类选项卡数据的接口开始
+// 1.请求顶部分类选项卡数据的接口开始
 server.get('/category',(req,res)=>{
     //  11.查询lc_category数据表的全部记录
     let sql='SELECT id,category_name FROM lc_category ORDER BY id';
@@ -56,7 +56,7 @@ server.get('/category',(req,res)=>{
 });
 // 请求顶部分类选项卡数据的接口结束
 
-// 请求主页商品数据开始
+// 2.请求主页第一个面板商品数据开始
 server.get('/laptop',(req,res)=>{
     // 测试
     // res.send('ok');
@@ -69,7 +69,39 @@ server.get('/laptop',(req,res)=>{
     }
 )
 });
-// 请求主页商品数据结束
+// 请求主页第一个面板商品数据结束
+
+// 3.请求主页第二个面板所需数据
+server.get('/category_laptop',(req,res)=>{
+    // 测试
+    // res.send('ok');
+    // 声明id保存请求中传来的参数
+    let id=req.query.id;
+    // 写查询lc_category_laptop表格的sql语句
+    let sql='SELECT * FROM lc_category_laptop WHERE category_id=?';
+    // 执行sql语句
+    pool.query(sql,[id],(error,results)=>{
+        if(error)throw error;
+        res.send({code:200,message:'查询成功',results:results});
+    })
+})
+// 请求主页第二个面板商品数据结束
+
+// 4.请求详情页数据开始
+server.get('/details',(req,res)=>{
+    let id=req.query.id;
+    // 测试
+    // res.send('ok');
+    // 将lc_laptop和lc_category_laptop两个表中的lid=lid编号；title=ltitle;subtitle=lsubtitle;detail=ldetail;price=price;img=img
+    let sql='SELECT * FROM (SELECT lid AS id,title,subtitle,detail,price,img FROM lc_category_laptop UNION SELECT lid AS id,ltitle AS title,lsubtitle AS subtitle,ldetail AS detail,price,img FROM lc_laptop) AS A WHERE id=?';
+    // 执行sql语句
+    pool.query(sql,[id],(error,results)=>{
+        if(error)throw error;
+        res.send({code:200,message:'查询成功',results:results});
+    })
+
+})
+// 4.请求详情页数据结束
 
 
 

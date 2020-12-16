@@ -14,6 +14,7 @@
   font-family: "Microsoft YaHei";
 }
 #app a{
+    color:black;
     text-decoration: none;
 }
 </style>

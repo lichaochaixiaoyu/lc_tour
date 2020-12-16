@@ -3,7 +3,7 @@
   <div class="index">
     <!-- <img src="../assets/images/index/carousel/banner1.jpg" alt=""> -->
     <!-- 顶部导航开始 -->
-    <mt-header title="首页" class="header">
+    <mt-header title="首页" class="header" fixed>
          <router-link to="/" slot="left">
           <img class="header-icon" src="../assets/images/index/icon/phone.jpg" alt="" width="20px" height="20px">
          </router-link>
@@ -13,7 +13,7 @@
     </mt-header>
     <!-- 顶部导航结束 -->
     <!-- 顶部选项卡开始 -->
-    <mt-navbar v-model="active" class="my-navbar">
+    <mt-navbar v-model="active" class="my-navbar" fixed>
       <mt-tab-item :id="item.id.toString()" v-for="(item,i) of navCategory" :key=i>
         {{item.category_name}}
       </mt-tab-item>
@@ -105,6 +105,7 @@
            </div>
            <ul class="banma_ul">
              <li class="banma_li1" v-for="(item,n) of laptops[i]" :key=n>
+                  <router-link :to="`/details/${item.lid}`">
                <div class="banma_li_img">
                <img  :src="item.img" alt="" width="150">
                </div>
@@ -112,8 +113,8 @@
                <p style="font-size:12px">{{item.lsubtitle}}</p>
                <p style="font-size:12px">{{item.ldetail}}</p>
                <p style="font-size:13px">￥{{item.price}}起</p>
+             </router-link>
              </li>
-             
            </ul>
          </div>
         </div>
@@ -121,8 +122,24 @@
          </mt-tab-container-item> 
          <!-- 第一个面板：首页区域结束 -->
          <!-- 第二个面板：同类型面板开始 -->
-         <mt-tab-container-item id="2">
-           22
+         <mt-tab-container-item class="container2" :id="active"> 
+            <!-- 从宝藏云南开始的面板中一部分用于循环 -->
+         
+           <div class="yunnan_start" v-for="(item,i) of this.category_laptop" :key="i">
+              <router-link :to="`/details/${item.lid}`">
+             <div class="yunnan_img_div">
+               <img class="yunnan_img" :src="item.img">
+             </div>
+             <p class="p_title">{{item.title}}</p>
+             <p class="p_subtitle">{{item.subtitle}}</p>
+             <p class="p_details">
+               <span class="span_detail">{{item.detail}}</span>
+               <span class="span_price">￥{{item.price}}起</span>
+             </p>
+            </router-link>
+           </div>
+          
+
          </mt-tab-container-item>
          <!-- 第二个面板：同类型面板结束 -->
 
@@ -163,7 +180,8 @@
 </template>
 <style>
 .index>.header{
-  margin:10px 0;
+  height: 50px;
+  padding: 0 15px;
   color: #000;
   background: white;
   font-family: "Microsoft YaHei";
@@ -184,11 +202,13 @@
     font-size: 12px ;
 }
 .my-navbar{
+  margin-top:40px;
   padding: 0 8px;
   border-bottom: 1px solid #ddd;
 }
 /* 轮播图 */
 .index .container{
+  margin-top:90px;
   margin-bottom:50px;
 }
 .mint-swipe, .mint-swipe-items-wrap {
@@ -332,6 +352,60 @@ border-radius: 3px;
   color:#da3778;
   font-weight: bold;
 }
+
+/* 从宝藏云南开始的样式 */
+.yunnan_start{
+  margin:10px 0 20px 0;
+}
+.yunnan_img_div{
+  margin-bottom: 10px;
+}
+.yunnan_img{
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+.p_title{
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 12px;
+  margin-left: 5px;
+  letter-spacing: 1px;
+}
+.p_subtitle{
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 12px;
+  margin-left: 5px;
+  color: #b2b2b2;
+  letter-spacing: 1px;
+}
+.p_details{
+  display: flex;
+  justify-content: space-between;
+}
+.span_detail{
+  font-size:13px;
+  text-align: center;
+  color: #C27392;
+  border: 1px solid #C27392;
+  transform: scale(0.87);
+  box-sizing: border-box;
+  padding: 4px;
+  letter-spacing: 1px;
+}
+.span_price{
+ color:#da3778;
+ font-weight: bold;
+ margin: 5px 10px 2px 0;
+ font-size:18px;
+}
 </style>
 <script>
 // import { Swipe, SwipeItem } from 'mint-ui';
@@ -342,7 +416,29 @@ export default {
      tabSelected:"index",
      navCategory:[],
      laptops:[],
+     category_laptop:[]
    }
+  },
+  watch:{
+    active(value){
+      this.axios.get('/category_laptop',
+      {
+        params:{
+          id:value
+        }
+      }).then(res=>{
+        var arr=res.data.results;
+         var arr1=[];
+         arr.forEach(elem=>{
+          if(elem.img != null){
+                elem.img = require('../assets/images/index/laptop/'+elem.img);
+              }
+           arr1.push(elem);
+          });
+        this.category_laptop=arr1;
+        // console.log(this.category_laptop);
+      })
+    }
   },
   mounted(){
      //请求顶部选项卡数据
@@ -350,10 +446,10 @@ export default {
         this.navCategory=res.data.results;
         // console.log(this.navCategory);
      });
-     //请求商品数据
+     //请求商品数据,
      this.axios.get('/laptop').then(res=>{
         var arr=res.data.results;
-            console.log(arr);
+            // console.log(arr);
         var arr1=[];
         arr.forEach(elem=>{
               if(elem.img != null){
@@ -371,7 +467,7 @@ export default {
          });
         this.laptops.push(arr2);
        }
-       console.log(this.laptops);
+      //  console.log(this.laptops);
        
      })
   },
